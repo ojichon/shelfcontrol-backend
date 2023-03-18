@@ -1,57 +1,51 @@
-import { db } from "../db.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 
-export const register = (req, res) => {
-  // CHECKS EXISTING USER
-  const q = "SELECT * FROM user WHERE email = ? OR username = ?";
+const pool = new Pool({
+  user: "postgres",
+  host: "localhost",
+  database: "shelfcontrol",
+  password: "",
+  port: "5432",
+});
 
-  db.query(q, [req.body.name, req.body.email, req.body.username], (err, data) => {
-    if (err) return res.json(err);
-    if (data.length) return res.status(409).json("User already exists");
+async function register(username, password) {
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    // PASSWORD HASH and user creation
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(req.body.password, salt);
+  try {
+    const client = await pool.connect();
+    const result = await client.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id', [username, hashedPassword]);
+    const userId = result.rows[0].id;
+    client.release();
+    return { success: true, userId };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: 'Failed to register user' };
+  }
+}
 
-    const q = "INSERT INTO user (`name`, `email`, `username`, `password`) VALUES (?)";
-    const values = [req.body.name, req.body.username, req.body.email, hash];
+async function login(username, password) {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT id, password FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
+    client.release();
 
-    db.query(q, [values], (err, data) => {
-      if (err) return res.json(err);
-      return res.status(200).json("User has been created");
-    });
-  });
-};
+    if (!user) {
+      return { success: false, message: 'Username or password is incorrect' };
+    }
 
-export const login = (req, res) => {
-  //CHECK USER EXISTS
+    const isMatch = await bcrypt.compare(password, user.password);
 
-  const q = "SELECT * FROM user WHERE username = ?";
+    if (!isMatch) {
+      return { success: false, message: 'Username or password is incorrect' };
+    }
 
-  db.query(q[req.body.username], (err, data) => {
-    if (err) return res.json(err);
-    if (data.length === 0) return res.status(404).json("User not found");
+    return { success: true, userId: user.id };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: 'Failed to login' };
+  }
+}
 
-    //CHECK PASSWORD
-    const isPasswordCorrect = bcrypt.compareSync(
-      req.body.password,
-      data[0].password
-    ); // true
-
-    if (!isPasswordCorrect)
-      return res.status(404).json("Wrong username or password");
-
-    const token = jwt.sign({ id: data[0].id }, "jwtkey");
-    const { password, ...other } = data[0];
-
-    res
-      .cookie("access_token", token, {
-        httpOnly: true,
-      })
-      .status(200)
-      .json(other);
-  });
-};
-
-export const logout = (req, res) => {};
+module.exports = { register, login };
