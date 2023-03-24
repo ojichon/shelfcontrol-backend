@@ -27,12 +27,22 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize,
-    modelName: "User",
+    modelName: "Users", 
+    timestamps: false, 
   }
 );
+
+
+
+
+
 
 class BooksRead extends Model {}
 BooksRead.init(
@@ -81,6 +91,7 @@ BooksRead.init(
   {
     sequelize,
     modelName: "BooksRead",
+    timestamps: false, 
   }
 );
 
@@ -131,7 +142,17 @@ BooksNotRead.init(
   {
     sequelize,
     modelName: "BooksNotRead",
+    timestamps: false, 
   }
 );
+
+(async () => {
+  try {
+    await sequelize.sync({ force: false });
+    console.log("Database tables have been created/updated.");
+  } catch (error) {
+    console.error("Error creating/updating database tables:", error);
+  }
+})();
 
 export { User, BooksRead, BooksNotRead, sequelize };
