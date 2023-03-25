@@ -12,8 +12,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(cors());
-
 app.use("/api/books", bookRoutes);
+
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
 
