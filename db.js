@@ -39,13 +39,8 @@ User.init(
   }
 );
 
-
-
-
-
-
-class BooksRead extends Model {}
-BooksRead.init(
+class Book extends Model {}
+Book.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -87,61 +82,15 @@ BooksRead.init(
     link_to_buy: {
       type: DataTypes.STRING,
     },
-  },
-  {
-    sequelize,
-    modelName: "BooksRead",
-    timestamps: false, 
-  }
-);
-
-class BooksNotRead extends Model {}
-BooksNotRead.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: User,
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-    },
-    title: {
-      type: DataTypes.STRING,
+    status: {
+      type: DataTypes.ENUM('read', 'unread'),
       allowNull: false,
-    },
-    author: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    rating: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    review: {
-      type: DataTypes.TEXT,
-    },
-    cover_photo: {
-      type: DataTypes.STRING,
-    },
-    description: {
-      type: DataTypes.TEXT,
-    },
-    date_published: {
-      type: DataTypes.DATEONLY,
-    },
-    link_to_buy: {
-      type: DataTypes.STRING,
+      defaultValue: 'unread',
     },
   },
   {
     sequelize,
-    modelName: "BooksNotRead",
+    modelName: "Book",
     timestamps: false, 
   }
 );
@@ -155,4 +104,4 @@ BooksNotRead.init(
   }
 })();
 
-export { User, BooksRead, BooksNotRead, sequelize };
+export { User, Book, sequelize };
