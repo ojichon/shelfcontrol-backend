@@ -11,13 +11,17 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(cors());
-app.use("/api/books", bookRoutes);
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
+app.get("/", (req, res) => {
+  res.send("Hello, world!");
+});
+app.use("/api/books", bookRoutes)
 
 app.use("/api/user", userRoutes);
+
 app.use("/api/auth", authRoutes);
 
-// Add this error handling middleware
 app.use((err, req, res, next) => {
   console.error("Error Middleware:", err);
   res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });

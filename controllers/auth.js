@@ -1,5 +1,10 @@
 import pkg from 'pg';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { User } from '../db.js';
+
+dotenv.config();
 
 const { Pool } = pkg;
 
@@ -11,53 +16,74 @@ const pool = new Pool({
   port: 5432,
 });
 
-async function register(req, res) {
-  const { username, password, name, email } = req.body;
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
+function authenticate(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ message: 'No authorization header provided' });
+    return;
+  }
+  const token = authHeader.split(' ')[1];
   try {
-    const client = await pool.connect();
-    const result = await client.query('INSERT INTO "Users" (username, password, name, email) VALUES ($1, $2, $3, $4) RETURNING id', [username, hashedPassword, name, email]);
-    const userId = result.rows[0].id;
-    client.release();
-    res.status(201).json({ success: true, userId });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Failed to register user' });
+    res.status(401).json({ message: 'Invalid token', error: error.message });
   }
 }
 
-async function login(req, res) {
-  console.log('login function called');
+const register = async (req, res) => {
+  const { name, email, username, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ where: { email } });
+
+    if (existingUser) {
+      return res.status(409).json({ message: 'User already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      name,
+      email,
+      username,
+      password: hashedPassword,
+    });
+
+    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({ token });
+  } catch (error) {
+    console.error('Error during sign-up:', error);
+    res.status(500).json({ message: 'Failed to sign up' });
+  }
+};
+
+
+const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT id, password FROM "Users" WHERE email = $1', [email]);
-    const user = result.rows[0];
-    client.release();
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
-      console.log('User not found:', email);
-      res.status(401).json({ success: false, message: 'Email or password is incorrect' });
-      return;
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
-      console.log('Incorrect password for user:', email);
-      res.status(401).json({ success: false, message: 'Email or password is incorrect' });
-      return;
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid password' });
     }
 
-    console.log('User logged in:', email);
-    res.status(200).json({ success: true, userId: user.id });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({ token });
   } catch (error) {
-    console.error('Error in login function:', error);
-    res.status(500).json({ success: false, message: 'Failed to login', error: error.message });
+    console.error('Error during login:', error);
+    res.status(500).json({ message: 'Failed to log in' });
   }
-}
+};
 
-export { register, login };
+export { register, login, authenticate };
