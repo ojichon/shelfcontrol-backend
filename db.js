@@ -6,6 +6,8 @@ const sequelize = new Sequelize("shelfcontrol", "postgres", "", {
   port: 5432,
 });
 
+console.log(sequelize)
+
 class User extends Model {}
 User.init(
   {
@@ -69,18 +71,21 @@ Book.init(
     },
     review: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     cover_photo: {
       type: DataTypes.STRING,
     },
     description: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
     date_published: {
       type: DataTypes.DATEONLY,
     },
     link_to_buy: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM('read', 'unread'),
