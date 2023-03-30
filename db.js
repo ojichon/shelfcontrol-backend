@@ -6,6 +6,8 @@ const sequelize = new Sequelize("shelfcontrol", "postgres", "", {
   port: 5432,
 });
 
+console.log(sequelize)
+
 class User extends Model {}
 User.init(
   {
