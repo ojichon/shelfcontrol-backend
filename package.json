@@ -27,5 +27,24 @@
     "webpack": "^5.76.2",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.13.0"
+  },
+  "production": {
+    "username": "shelfcontrol_user",
+    "password": "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte",
+    "database": "shelfcontrol",
+    "host": "dpg-cghodp2k728s1bpn159g-a",
+    "dialect": "postgres"
+  },
+  "development": {
+    "username": "postgres",
+    "password": "",
+    "database": "shelcontrol",
+    "host": "localhost",
+    "dialect": "postgres",
+    "port": 5432
   }
+  
 }
+
+
+  
