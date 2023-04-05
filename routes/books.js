@@ -21,7 +21,7 @@ const getSavedBooks = async (req, res) => {
     if (unreadBooks.status === 'fulfilled' && readBooks.status === 'fulfilled') {
       res.status(200).json({ unreadBooks: unreadBooks.value, readBooks: readBooks.value });
     }
-  } catch (error) {
+  } catch (error) {``
     console.error("Error fetching saved books:", error);
     res
       .status(500)
