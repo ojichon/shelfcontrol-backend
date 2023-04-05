@@ -2,6 +2,7 @@ import { Sequelize, DataTypes, Model } from "sequelize";
 
 const sequelize = new Sequelize("shelfcontrol", "postgres", "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte", {
   username: "shelfcontrol_user",
+  password: "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte",
   database: "shelfcontrol",
   host: "dpg-cghodp2k728s1bpn159g-a",
   dialect: "postgres",
