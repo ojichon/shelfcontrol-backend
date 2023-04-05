@@ -1,12 +1,16 @@
 import { Sequelize, DataTypes, Model } from "sequelize";
 
-const sequelize = new Sequelize("shelfcontrol", "postgres", "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte", {
+const sequelize = new Sequelize("shelfcontrol", "shelfcontrol_user", "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte", {
   username: "shelfcontrol_user",
   password: "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte",
   database: "shelfcontrol",
-  host: "dpg-cghodp2k728s1bpn159g-a",
+  host: "dpg-cghodp2k728s1bpn159g-a.ohio-postgres.render.com",
   dialect: "postgres",
   port: 5432,
+  ssl: true,
+  dialectOptions: {
+    ssl: true
+  }
 });
 
 console.log(sequelize)
