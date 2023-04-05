@@ -36,10 +36,10 @@
     "dialect": "postgres"
   },
   "development": {
-    "username": "postgres",
-    "password": "",
+    "username": "shelfcontrol_user",
+    "password": "a75s3hb6Jh7CuBZ3x6BFYcjH06QhgIte",
     "database": "shelcontrol",
-    "host": "localhost",
+    "host": "dpg-cghodp2k728s1bpn159g-a",
     "dialect": "postgres",
     "port": 5432
   }
